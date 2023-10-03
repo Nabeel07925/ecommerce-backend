@@ -25,3 +25,12 @@ async def create_inventory(request: schema.Inventory, db: Session = Depends(get_
         return InventoryComponent.create_inventory(inventory=request, db=db)
     except Exception as e:
         return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e)
+
+
+@router.put('/{inventory_id}')
+async def create_inventory(inventory_id: int, request: schema.Inventory, db: Session = Depends(get_db)):
+    try:
+        return InventoryComponent.update_inventory(inventory_id=inventory_id,
+                                                   inventory=request, db=db)
+    except Exception as e:
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e)

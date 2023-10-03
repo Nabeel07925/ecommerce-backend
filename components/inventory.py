@@ -11,3 +11,9 @@ class InventoryComponent:
     def create_inventory(inventory: schema.Inventory, db):
 
         return InventoryRepository.create_inventory(inventory_info=inventory, db=db)
+
+    @staticmethod
+    def update_inventory(inventory_id, inventory: schema.Inventory, db):
+
+        return InventoryRepository.update_inventory(inventory_id=inventory_id,
+                                                    inventory_info=inventory, db=db)
