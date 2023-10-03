@@ -8,20 +8,20 @@ from constants.database import UserStatus, OrderState
 class Brand(Base):
     __tablename__ = 'brand'
 
-    name = Column('name', String(20), nullable=False)
+    name = Column('name', String(50), nullable=False)
 
 
 class ProductCategory(Base):
     __tablename__ = 'product_category'
 
-    name = Column('name', String(20))
+    name = Column('name', String(100))
     code = Column('code', String(40), nullable=False)
 
 
 class Product(Base):
     __tablename__ = 'product'
 
-    name = Column('name', String(20))
+    name = Column('name', String(150))
     brand_id = Column('brand_id', ForeignKey('brand.id', onupdate='cascade', ondelete='cascade'))
     category_id = Column('category_id', ForeignKey('product_category.id', onupdate='cascade', ondelete='cascade'))
 
@@ -32,7 +32,7 @@ class Product(Base):
 class Stock(Base):
     __tablename__ = 'stock'
 
-    arrived_at = Column('arrived_ata', DateTime, nullable=False)
+    arrived_at = Column('arrived_at', DateTime, nullable=False)
 
 
 class Inventory(Base):
@@ -43,8 +43,8 @@ class Inventory(Base):
     stock_id = Column('stock_id', ForeignKey('stock.id', onupdate='cascade', ondelete='cascade'),
                       nullable=False)
     no_of_items_available = Column('no_of_items_available', Integer, nullable=False)
-    manufacture_date = Column('manufacture_date', DateTime, nullable=False)
-    expiry_date = Column('expiry_date', DateTime, nullable=False)
+    manufacture_date = Column('manufacture_date', DateTime)
+    expiry_date = Column('expiry_date', DateTime)
     retail_price = Column('retail_price', Float, nullable=False)
     invoice_price = Column('invoice_price', Float, nullable=False)
 
@@ -74,9 +74,10 @@ class Order(Base):
 
     state = Column('state', Enum(*OrderState.as_list()), nullable=False)
     user_id = Column('user_id', ForeignKey('user.id', onupdate='cascade', ondelete='cascade'),
-                     nullable=False)
+                     nullable=True)
     shipping_charges = Column('shipping_charges', Float, nullable=False)
     total_amount = Column('total_amount', Float, nullable=False)
+    business_cost = Column('total_cost', Float, nullable=False)
 
 
 class OrderItem(Base):
