@@ -53,6 +53,20 @@ def get_inventory_id(cur, con, product_id, stock_id, no_of_items, retail_price, 
     return inventory_id
 
 
+def remove_inventory(cur, con, inventory_id, no_of_items_removed):
+    cur.execute('''Select no_of_items_available from public.inventory where id = {}'''.format(inventory_id))
+    inventory = cur.fetchone()
+    if inventory:
+        no_of_items_before = inventory[0]
+        cur.execute('''UPDATE public.inventory SET no_of_items_available = {} where id = {}'''.
+                    format(no_of_items_before - no_of_items_removed, inventory_id))
+        updated_inventory = cur.fetchone()
+        if cur.rowcount:
+            con.commit()
+            return True
+    return False
+
+
 def add_order(cur, con, inventory_id, retail_price, invoice_price):
     # in real scenarios there will of course be multiple sorts of items in one order but for now there would just be one
     no_of_items = random.randint(1, 5)
@@ -71,6 +85,10 @@ def add_order(cur, con, inventory_id, retail_price, invoice_price):
                                                   str(datetime.utcnow()), str(datetime.utcnow())))
         if cur.lastrowid:
             con.commit()
+            remove_inventory(cur=cur,
+                             con=con,
+                             inventory_id=inventory_id,
+                             no_of_items_removed=no_of_items)
             return True
 
     return False
@@ -93,37 +111,39 @@ if __name__ == '__main__':
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         for row in csv_reader:
-            if line_count == 0:
-                cols = row
-                brands_index = cols.index('Brand')
-                product_name_index = cols.index('product_name')
-                price_index = cols.index('price_original')
-                print('Column names are {} {} {}'.format(brands_index, product_name_index, price_index))
-                line_count += 1
-            else:
-                brand_id = get_brand_id(cur, cnx, row[brands_index])
-                product_id = get_product_id(cur=cur,
-                                            con=cnx,
-                                            product_name=row[product_name_index],
-                                            brand_id=brand_id,
-                                            category_id=category_id)
-                product_price = float(row[price_index])
-                invoice_price = product_price - (product_price * 0.30)
-                inventory_id = get_inventory_id(cur=cur,
+            try:
+                if line_count == 0:
+                    cols = row
+                    brands_index = cols.index('Brand')
+                    product_name_index = cols.index('product_name')
+                    price_index = cols.index('price_original')
+                    print('Column names are {} {} {}'.format(brands_index, product_name_index, price_index))
+                    line_count += 1
+                else:
+                    brand_id = get_brand_id(cur, cnx, row[brands_index])
+                    product_id = get_product_id(cur=cur,
                                                 con=cnx,
-                                                product_id=product_id,
-                                                stock_id=1,
-                                                no_of_items=50000,
-                                                retail_price=product_price,
-                                                invoice_price=invoice_price
-                                                )
+                                                product_name=row[product_name_index],
+                                                brand_id=brand_id,
+                                                category_id=category_id)
+                    product_price = float(row[price_index])
+                    invoice_price = product_price - (product_price * 0.30)
+                    inventory_id = get_inventory_id(cur=cur,
+                                                    con=cnx,
+                                                    product_id=product_id,
+                                                    stock_id=1,
+                                                    no_of_items=50000,
+                                                    retail_price=product_price,
+                                                    invoice_price=invoice_price
+                                                    )
 
-                order_placed = add_order(cur=cur,
-                                         con=cnx,
-                                         inventory_id=inventory_id,
-                                         retail_price=product_price,
-                                         invoice_price=invoice_price)
-
+                    order_placed = add_order(cur=cur,
+                                             con=cnx,
+                                             inventory_id=inventory_id,
+                                             retail_price=product_price,
+                                             invoice_price=invoice_price)
+            except Exception as e:
+                print(e)
                 # print(f'\t{row[0]} works in the {row[1]} department, and was born in {row[2]}.')
                 line_count += 1
         print(f'All orders processed')

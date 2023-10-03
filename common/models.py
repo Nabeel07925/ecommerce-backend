@@ -8,20 +8,20 @@ from constants.database import UserStatus, OrderState
 class Brand(Base):
     __tablename__ = 'brand'
 
-    name = Column('name', String(50), nullable=False)
+    name = Column('name', String(150), nullable=False)
 
 
 class ProductCategory(Base):
     __tablename__ = 'product_category'
 
-    name = Column('name', String(100))
+    name = Column('name', String(150))
     code = Column('code', String(40), nullable=False)
 
 
 class Product(Base):
     __tablename__ = 'product'
 
-    name = Column('name', String(150))
+    name = Column('name', String(200))
     brand_id = Column('brand_id', ForeignKey('brand.id', onupdate='cascade', ondelete='cascade'))
     category_id = Column('category_id', ForeignKey('product_category.id', onupdate='cascade', ondelete='cascade'))
 
@@ -47,6 +47,8 @@ class Inventory(Base):
     expiry_date = Column('expiry_date', DateTime)
     retail_price = Column('retail_price', Float, nullable=False)
     invoice_price = Column('invoice_price', Float, nullable=False)
+
+    product = relationship('Product', backref=backref('inventories', uselist=True))
 
 
 class UserAddress(Base):
@@ -79,6 +81,8 @@ class Order(Base):
     total_amount = Column('total_amount', Float, nullable=False)
     business_cost = Column('total_cost', Float, nullable=False)
 
+    order_items = relationship('OrderItem', backref='order', uselist=True)
+
 
 class OrderItem(Base):
     __tablename__ = 'order_item'
@@ -89,3 +93,4 @@ class OrderItem(Base):
     order_id = Column('order_id', ForeignKey('order.id', onupdate='cascade', ondelete='cascade'),
                       nullable=False)
 
+    inventory = relationship('Inventory', backref=backref('order_item', uselist=True), uselist=False)
