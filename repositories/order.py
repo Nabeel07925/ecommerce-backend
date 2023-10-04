@@ -14,17 +14,19 @@ class OrderRepository:
 
     @staticmethod
     def get_orders_in_dates(db: Session, start_date, end_date, product_filter=None, category_filter=None):
-        query = db.query(Order)
+        query = db.query(Order).join(OrderItem).join(Inventory).join(Product).options(joinedload(Order.order_items, OrderItem.inventory, Inventory.product))
 
         if start_date and end_date:
             query = query.filter(and_(func.date(Order.updated_at) >= start_date,
                                       func.date(Order.updated_at) <= end_date))
-        if product_filter or category_filter:
-            query = query.join(OrderItem).join(Inventory).join(Product).options(joinedload(Order.order_items, OrderItem.inventory, Inventory.product)).filter(
+        # if product_filter or category_filter:
+        #     query = query.join(OrderItem).join(Inventory).join(Product).options(joinedload(Order.order_items, OrderItem.inventory, Inventory.product))
+        if product_filter:
+            query = query.filter(
                 Product.id == product_filter
             )
-            if category_filter:
-                query = query.filter(ProductCategory.id == category_filter)
+        if category_filter:
+            query = query.filter(ProductCategory.id == category_filter)
         return query.all()
 
     @staticmethod

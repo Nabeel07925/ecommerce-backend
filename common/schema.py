@@ -1,5 +1,6 @@
 import datetime
-from typing import List
+from typing import List, Union
+
 from pydantic import BaseModel
 
 
@@ -40,7 +41,7 @@ class Brand(BaseModel):
 
 
 class Revenue(BaseModel):
-    start_date: str
-    end_date: str
-    total_sales: float
-    total_profit: float
+    start_date: Union[str, None]
+    end_date: Union[str, None]
+    total_sales: Union[float, None]
+    total_profit: Union[float, None]
