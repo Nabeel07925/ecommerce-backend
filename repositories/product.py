@@ -9,6 +9,10 @@ class ProductRepository:
         return db.query(Product).all()
 
     @staticmethod
+    def get_product_by_id(id_: int, db: Session):
+        return db.query(Product).filter(Product.id == id_).one_or_none()
+
+    @staticmethod
     def create_product(product_info: schema.Product, db: Session):
         prod = Product(
             name=product_info.name,

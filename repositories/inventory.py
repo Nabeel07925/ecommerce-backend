@@ -34,17 +34,15 @@ class InventoryRepository:
 
     @staticmethod
     def update_inventory(inventory_id: int, inventory_info: schema.Inventory, db: Session):
-        inventory = InventoryRepository.get_inventory_by_id(inventory_id, db)
-        inventory.product_id = inventory_info.product_id
-        inventory.stock_id = inventory_info.stock_id
-        inventory.no_of_items_available = inventory_info.no_of_items_available
-        inventory.manufacture_date = inventory_info.manufacture_date
-        inventory.expiry_date = inventory_info.expiry_date
-        inventory.retail_price = inventory_info.retail_price
-        inventory.invoice_price = inventory_info.invoice_price
-        inventory.created_at = inventory_info.created_at
-        inventory.updated_at = inventory_info.updated_at
-        db.refresh(inventory)
+        db.query(Inventory).filter(Inventory.id == inventory_id).update({
+            "product_id": inventory_info.product_id,
+            "stock_id": inventory_info.stock_id,
+            "no_of_items_available": inventory_info.no_of_items_available,
+            "manufacture_date": inventory_info.manufacture_date,
+            "expiry_date": inventory_info.expiry_date,
+            "retail_price": inventory_info.retail_price,
+            "invoice_price": inventory_info.invoice_price,
+            "updated_at": datetime.utcnow()
+        })
         db.commit()
-        return inventory
-
+        return f"Inventory with {inventory_id} has been updated"

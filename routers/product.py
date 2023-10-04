@@ -19,6 +19,11 @@ async def get_all_products(db: Session = Depends(get_db)):
     return ProductComponent.get_products(db)
 
 
+@router.get('/{product_id}')
+async def get_all_products(product_id: int, db: Session = Depends(get_db)):
+    return ProductComponent.get_products(product_id, db)
+
+
 @router.post('/')
 async def create_product(request: schema.Product, db: Session = Depends(get_db)):
     try:
